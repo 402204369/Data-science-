@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Oct  6 19:52:29 2024
+
+@author: Micaiah
+"""
+
+#importing libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import sklearn.linear_model as sk
+import sklearn.preprocessing as sks
+
+#data
+years_experience = np.array([1, 2, 3, 5, 7, 8, 10, 12, 15, 18])
+education_level = np.array([0, 0, 1, 1, 0, 2, 1, 2, 1, 2])
+salary = np.array([50, 55, 65, 75, 80, 95, 90, 105, 110, 125])
+
+# 1. Creating scatter plot
+plt.figure(figsize=(12, 8))
+colors = ['b', 'g', 'r']
+labels = ["Bachelor's", "Master's", "PhD"]
+
+for i in range(3):
+    data = education_level == i
+    plt.scatter(years_experience[data], salary[data], color=colors[i], label=labels[i])
+
+# 2. Adding lines of best fit
+for i in range(3):
+    data = education_level == i
+    if np.sum(data) > 1:
+        coeffs = np.polyfit(years_experience[data], salary[data], 1)
+        poly = np.poly1d(coeffs)
+        plt.plot(years_experience[data], poly(years_experience[data]), color=colors[i], linestyle='--')
+
+plt.title("Salary vs Years of Experience Colored by Education Level")
+plt.xlabel("Years of Experience")
+plt.ylabel("Salary (in thousands of USD)")
+plt.legend()
+plt.show()
+
+# 3. Fit a multiple linear regression model
+X = np.column_stack((years_experience, education_level))
+model = sk.LinearRegression()
+model.fit(X, salary)
+
+# 4. Display coefficients and intercept
+print("Coefficients:", model.coef_)
+print("Intercept:", model.intercept_)
+
+# 5. Predictions
+# a. Engineer with 6 years of experience and a Bachelor's degree
+pred_1 = model.predict(np.array([[6, 0]]))
+print("Predicted salary for 6 years experience and Bachelor's:", pred_1[0])
+
+# b. Engineer with 9 years of experience and a PhD
+pred_2 = model.predict(np.array([[9, 2]]))
+print("Predicted salary for 9 years experience and PhD:", pred_2[0])
+
+# 6. Create a new graph showing original data, lines of best fit, and predicted values
+plt.figure(figsize=(12, 8))
+
+# Scatter points
+for i in range(3):
+    data = education_level == i
+    plt.scatter(years_experience[data], salary[data], color=colors[i], label=labels[i])
+
+# Lines of best fit
+for i in range(3):
+    data = education_level == i
+    if np.sum(data) > 1:
+        coeffs = np.polyfit(years_experience[data], salary[data], 1)
+        poly = np.poly1d(coeffs)
+        plt.plot(years_experience[data], poly(years_experience[data]), color=colors[i], linestyle='--')
+
+# Predicted values
+plt.scatter([6, 9], [pred_1[0], pred_2[0]], color='purple', label='Predictions', marker='x', s=100)
+
+plt.title("Salary vs Years of Experience with Predictions")
+plt.xlabel("Years of Experience")
+plt.ylabel("Salary (in thousands of USD)")
+plt.legend()
+plt.show()
